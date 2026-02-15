@@ -46,12 +46,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-bold">Admin Panel</h1>
 
-          {/* <button
-            className="lg:hidden text-xl"
-            onClick={() => setSidebarOpen(false)}
-          >
-            ✖
-          </button> */}
         </div>
 
         <nav className="space-y-6">
