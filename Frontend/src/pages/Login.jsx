@@ -4,7 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const Login = ({ setAuth,auth}) => {
+const Login = ({ setAuth, auth }) => {
   const API_URL = import.meta.env.VITE_API_BASE_URL;
   const [formData, setformData] = useState({
     email: "",
@@ -19,10 +19,11 @@ const Login = ({ setAuth,auth}) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/api/user/login`, formData);
+      const res = await axios.post(`${API_URL}/api/user/login`, formData,{ withCredentials: true });
       console.log(res.data);
-      setAuth(true);
-      if (auth) {
+      if (res.data.userData) {
+        setAuth(true);
+        console.log(auth)
         navigate("/listProduct");
         toast.success("login successfull");
       }

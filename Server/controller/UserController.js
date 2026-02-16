@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../model/user.js";
-
+import jwt from "jsonwebtoken";
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, phoneNumber, password } = req.body;
@@ -38,9 +38,11 @@ const register = async (req, res) => {
 
     // Save user to database
     const user = await newUser.save();
+
     res.json({
       success: true,
       message: "User registered successfully",
+      userToken: token,
       user,
     });
   } catch (error) {
@@ -59,6 +61,18 @@ const login = async (req, res) => {
 
     const comparePass = await bcrypt.compare(password, user.password);
     if (!comparePass) return res.json({ message: "password not matched" });
+    if (comparePass) {
+    }
+    const token = jwt.sign({ _id: user._id }, process.env.VERIFY_TOKEN, {
+      expiresIn: "1d",
+    });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     return res.json({
       message: "Login successfull",
       userData: {
@@ -68,6 +82,7 @@ const login = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
       },
+      token,
     });
   } catch (error) {
     console.log(error);
@@ -86,8 +101,29 @@ const getAllUser = (req, res) => {
   }
 };
 
+const authMe = async (req, res) => {
+  try {
+    // console.log(userInput)
+      const userData = await User.findById(req.user)
+      // .select("-password");
+
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 4. Return user
+    res.status(200).json({
+      success: true,
+      message: "User logged in",
+      userData
+    });} catch (error) {
+    console.log(error)
+    res.status(500).json({message:"Internal server error",error})
+  }
+};
+
 // const updateUser=async(req,res)=>{
 
 // }
 
-export { register, login, getAllUser };
+export { register, login, getAllUser,authMe };

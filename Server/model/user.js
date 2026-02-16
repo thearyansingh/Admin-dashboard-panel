@@ -26,7 +26,7 @@ const userSchema = mongoose.Schema({
     required: true,
     minlength: 8,
   },
-});
+},);
 
 const User=mongoose.model("User",userSchema)
 
