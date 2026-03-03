@@ -3,7 +3,7 @@ import User from "../model/user.js";
 import jwt from "jsonwebtoken";
 const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, phoneNumber, password } = req.body;
+    const { fullName, email, phoneNumber, password, role } = req.body;
 
     // Check if user already exists
     const exist = await User.findOne({ email });
@@ -29,11 +29,11 @@ const register = async (req, res) => {
 
     // Create new user
     const newUser = new User({
-      firstName,
-      lastName,
+      fullName,
       phoneNumber,
       email,
-      password: hashedPassword, // Store hashed password
+      password: hashedPassword,
+      role,
     });
 
     // Save user to database
@@ -42,7 +42,6 @@ const register = async (req, res) => {
     res.json({
       success: true,
       message: "User registered successfully",
-      userToken: token,
       user,
     });
   } catch (error) {
@@ -61,11 +60,14 @@ const login = async (req, res) => {
 
     const comparePass = await bcrypt.compare(password, user.password);
     if (!comparePass) return res.json({ message: "password not matched" });
-    if (comparePass) {
-    }
-    const token = jwt.sign({ _id: user._id }, process.env.VERIFY_TOKEN, {
-      expiresIn: "1d",
-    });
+
+    const token = jwt.sign(
+      { _id: user._id, userRole: user.role },
+      process.env.VERIFY_TOKEN,
+      {
+        expiresIn: "1d",
+      },
+    );
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
@@ -81,6 +83,7 @@ const login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        role: user.role,
       },
       token,
     });
@@ -90,22 +93,32 @@ const login = async (req, res) => {
   }
 };
 
-const getAllUser = (req, res) => {
+const getAllUser = async (req, res) => {
   try {
-    const readUsers = User.find();
-    if (!readUsers) return res.json({ message: "no user found" });
-    console.log(readUsers);
-    return res.json({ message: "All the users", users: readUsers });
+    const readUsers = await User.find();
+
+    if (readUsers.length === 0) {
+      return res.json({ message: "No user found" });
+    }
+
+
+    return res.json({
+      message: "All the users",
+      users: readUsers,
+    });
   } catch (error) {
-    res.json({ message: "internal server error ", error });
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 
 const authMe = async (req, res) => {
   try {
     // console.log(userInput)
-      const userData = await User.findById(req.user)
-      // .select("-password");
+    const userData = await User.findById(req.user);
+    // .select("-password");
 
     if (!userData) {
       return res.status(404).json({ message: "User not found" });
@@ -115,10 +128,11 @@ const authMe = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "User logged in",
-      userData
-    });} catch (error) {
-    console.log(error)
-    res.status(500).json({message:"Internal server error",error})
+      userData,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error", error });
   }
 };
 
@@ -126,4 +140,4 @@ const authMe = async (req, res) => {
 
 // }
 
-export { register, login, getAllUser,authMe };
+export { register, login, getAllUser, authMe };

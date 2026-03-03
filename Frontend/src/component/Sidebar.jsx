@@ -2,16 +2,23 @@ import React, { useState } from "react";
 import { GiOpenBook } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 const menuData = [
+
   {
-    title: "Products",
-    submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
-  },
-  {
-    title: "Orders",
+    title: "Inventory",
    submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
   },
   {
-    title: "Categories",
+    title: "Purchase",
+     submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
+  },
+   {
+    title: "Sales",
+     submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
+  }, {
+    title: "Users",
+     submenu: [{name:"Users",url:"/userList"}],
+  }, {
+    title: "Reports",
      submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
   },
 ];
@@ -49,6 +56,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         <nav className="space-y-6">
+           <button
+                onClick={() =>navigate("/dashboard")}
+                className="w-full flex justify-between items-center px-3 py-2 rounded-lg hover:bg-gray-700"
+              >
+                <span>Dashboard</span>
+             
+              </button>
+
           {menuData.map((menu) => (
             <div key={menu.title}>
               <button

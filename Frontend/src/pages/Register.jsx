@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const Register = ({setAuth}) => {
+const Register = () => {
   const API_URL = import.meta.env.VITE_API_BASE_URL;
   const [formData, setformData] = useState({
     firstName: "",
@@ -24,7 +24,7 @@ const Register = ({setAuth}) => {
       const res = await axios.post(`${API_URL}/api/user/register`, formData);
       console.log(res);
       if (res) {
-        setAuth(true)
+        // setAuth(true)
         navigate("/listProduct")
         toast.success("user register successfully");
       }
