@@ -1,0 +1,139 @@
+name: Deploy to AWS EC2 via Docker Compose
+
+on:
+  workflow_dispatch: # Allows manual trigger from Actions tab
+  # Uncomment the lines below to enable automated trigger on push to main
+  # push:
+  #   branches:
+  #     - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository }}-backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+
+      - name: Build and Push Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Server
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ github.sha }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      - name: Build and Push Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Frontend
+          build-args: |
+            VITE_API_BASE_URL=/api
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.yml to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/app"
+
+      - name: SSH into EC2 and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p ~/app
+            cd ~/app
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Create environment configuration file
+            cat <<EOF > .env
+            PORT=5000
+            MONGODB_URL=${{ secrets.MONGODB_URL }}
+            VERIFY_TOKEN=${{ secrets.VERIFY_TOKEN }}
+            CORS_ORIGIN=http://${{ secrets.EC2_HOST }}
+            EOF
+
+            # Modify docker-compose to use the built registry images instead of local build contexts
+            cat <<EOF > docker-compose.prod.yml
+            version: '3.8'
+            services:
+              database:
+                image: mongo:6.0
+                container_name: auth-mongodb-prod
+                restart: unless-stopped
+                ports:
+                  - "27017:27017"
+                volumes:
+                  - mongo-data:/data/db
+                networks:
+                  - auth-network
+
+              backend:
+                image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
+                container_name: auth-backend-prod
+                restart: unless-stopped
+                ports:
+                  - "5000:5000"
+                env_file: .env
+                depends_on:
+                  - database
+                networks:
+                  - auth-network
+
+              frontend:
+                image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+                container_name: auth-frontend-prod
+                restart: unless-stopped
+                ports:
+                  - "80:80"
+                depends_on:
+                  - backend
+                networks:
+                  - auth-network
+
+            networks:
+              auth-network:
+                driver: bridge
+
+            volumes:
+              mongo-data:
+                driver: local
+            EOF
+
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
