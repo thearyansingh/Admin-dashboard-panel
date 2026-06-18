@@ -1,40 +1,55 @@
 import React from "react";
 import Layout from "./component/Layout";
-import Dashboard from "./pages/ProductList";
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProductList from "./pages/ProductList";
 import AddProduct from "./pages/AddProduct";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import { useState } from "react";
-import ProtectedAuth from "./ProtectedRoutes/ProtectedAuth";
+
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "./ErrorFallback";
-import { useEffect } from "react";
+
+import useAuth from "./customHook/useAuth";
+import DashBoard from "./pages/DashBoard";
+import UserList from "./pages/UserList";
+import PrivateRoute from "./ProtectedRoutes/PrivateRoute";
+import PublicRoute from "./ProtectedRoutes/PublicRoute";
+import AddUsers from "./pages/AddUsers";
 
 const App = () => {
-  const [auth, setAuth] = useState(false);
+  const { user, setUser } = useAuth();
+ 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Login setAuth={setAuth} auth={auth} />} />
         <Route
-          path="/register"
-          element={<Register setAuth={setAuth} auth={auth} />}
-        />
-
-        <Route
+          path="/"
           element={
-            <ProtectedAuth auth={auth}>
-              <ErrorBoundary fallback={ErrorFallback}>
-              <Layout />
-              </ErrorBoundary>
-            </ProtectedAuth>
+            <PublicRoute user={user}>
+              <Login user={user} setUser={setUser} />
+            </PublicRoute>
           }
-        >
-          <Route path="/listProduct" element={<ProductList />} />
-          <Route path="/addProduct" element={<AddProduct />} />
-        </Route>
+        />
+        <Route path="/register" element={<Register user={user} />} />
+
+          <Route
+            path=""
+            element={
+              <ErrorBoundary fallback={ErrorFallback}>
+                <PrivateRoute user={user}>
+                  <Layout />
+                </PrivateRoute>
+              </ErrorBoundary>
+            }
+          >
+            <Route path="/listProduct" element={<ProductList />} />
+            <Route path="/addProduct" element={<AddProduct />} />
+            <Route path="/dashboard" element={<DashBoard />} />
+            <Route path="/userList" element={<PrivateRoute user={user} userRoles={user.role}><UserList/></PrivateRoute>}/>
+            <Route path="/addUsers" element={<PrivateRoute user={user} userRoles={user.role}><AddUsers/></PrivateRoute>} />
+
+          </Route>
       </Routes>
     </>
   );

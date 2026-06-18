@@ -3,12 +3,21 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-const Login = ({ setAuth,auth}) => {
+import useAuth from "../customHook/useAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { login,logout } from "../Features/authSlice";
+import API from "../API/axiosInstance";
+const Login = ({user,setUser}) => {
   const API_URL = import.meta.env.VITE_API_BASE_URL;
+  const {fetchUser}=useAuth()
+  const dispatch=useDispatch()
+  console.log("login")
+
+  // const authData=useSelector((prev)=>prev.auth)
+  // const [token,setToken]=useState(false)
   const [formData, setformData] = useState({
-    email: "",
-    password: "",
+    email: "test@gmail.com",
+    password: "800aryan@@##",
   });
   const navigate = useNavigate();
 
@@ -19,19 +28,20 @@ const Login = ({ setAuth,auth}) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/api/user/login`, formData);
-      console.log(res.data);
-      setAuth(true);
-      if (auth) {
-        navigate("/listProduct");
-        toast.success("login successfull");
+      const {data} = await axios.post(`${API_URL}/api/user/login`, formData,{ withCredentials: true });
+      console.log(data.token)
+      if(data.token){
+        await fetchUser()
+       setUser(data.userData)
+       dispatch(login({user:data.userData,token:data.token}))
+       navigate("/listProduct")
       }
     } catch (error) {
       console.log(error);
       toast.error("login failed");
     }
   };
-  console.log(auth);
+ 
   return (
     <div className="min-h-screen  flex items-center justify-center bg-blue-400 px-4 overflow-y-auto">
       <div className="w-full max-w-4xl  bg-white rounded-xl shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-2">

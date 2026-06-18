@@ -4,11 +4,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const Register = ({setAuth}) => {
+const Register = () => {
   const API_URL = import.meta.env.VITE_API_BASE_URL;
   const [formData, setformData] = useState({
-    firstName: "",
-    lastName: "",
+fullName:"",
     email: "",
     password: "",
     phone: "",
@@ -24,7 +23,7 @@ const Register = ({setAuth}) => {
       const res = await axios.post(`${API_URL}/api/user/register`, formData);
       console.log(res);
       if (res) {
-        setAuth(true)
+        // setAuth(true)
         navigate("/listProduct")
         toast.success("user register successfully");
       }
@@ -66,28 +65,16 @@ const Register = ({setAuth}) => {
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
+            
             <div>
               <label className="text-sm font-medium text-gray-700">
-                First Name
+                Full Name
               </label>
               <input
                 type="text"
                 onChange={handleChange}
-                name="firstName"
-                value={formData.firstName}
-                placeholder="Enter Organization/Institute Name"
-                className="w-full mt-1 px-4 py-2 text-black border rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Last Name
-              </label>
-              <input
-                type="text"
-                onChange={handleChange}
-                name="lastName"
-                value={formData.lastName}
+                name="fullName"
+                value={formData.fullName}
                 placeholder="Enter Organization/Institute Name"
                 className="w-full mt-1 px-4 py-2 border text-black rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               />
