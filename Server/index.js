@@ -12,12 +12,12 @@ connect();
 app.use(express.json());
 app.use(cokkieParser());
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true
 }));    
 app.get("/", (req, res) => res.json({message: "Hi"}));
 app.use("/api/user", userRoute);
 
 app.use("/api/product",router)
-const port = 5000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`app is running on ${port}`));
