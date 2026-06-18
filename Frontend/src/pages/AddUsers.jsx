@@ -6,12 +6,13 @@ const AddUsers = () => {
   
 
   const [formData, setformData] = useState({
-    // name: "",
-    // price: "",
-    // description: "",
-    // category: "",
-    // discount: "",
+    fullName: "",
+    email: "",
+    password: "",
+    phoneNumber: "",
+    role: "",
   });
+  console.log(formData)
   const [loading, setLoading] = useState(false);
 
   const handleInput = (e) => {
@@ -96,8 +97,8 @@ const AddUsers = () => {
         <div>
           <label className="block mb-1 font-medium text-gray-600">Role</label>
           <select
-            name="category"
-            value={formData.category}
+            name="role"
+            value={formData.role}
             onChange={handleInput}
             className="w-full border text-black p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >

@@ -4,24 +4,26 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAuth from "../customHook/useAuth";
-
+import { useDispatch, useSelector } from "react-redux";
+import { login,logout } from "../Features/authSlice";
+import API from "../API/axiosInstance";
 const Login = ({user,setUser}) => {
   const API_URL = import.meta.env.VITE_API_BASE_URL;
   const {fetchUser}=useAuth()
+  const dispatch=useDispatch()
+  console.log("login")
+
+  // const authData=useSelector((prev)=>prev.auth)
   // const [token,setToken]=useState(false)
   const [formData, setformData] = useState({
-    email: "",
-    password: "",
+    email: "test@gmail.com",
+    password: "800aryan@@##",
   });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setformData({ ...formData, [e.target.name]: e.target.value });
   };
-
-
-
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ const Login = ({user,setUser}) => {
       if(data.token){
         await fetchUser()
        setUser(data.userData)
+       dispatch(login({user:data.userData,token:data.token}))
        navigate("/listProduct")
       }
     } catch (error) {

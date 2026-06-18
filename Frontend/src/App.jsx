@@ -19,8 +19,7 @@ import AddUsers from "./pages/AddUsers";
 
 const App = () => {
   const { user, setUser } = useAuth();
-
-  console.log(user);
+ 
   return (
     <>
       <Routes>
@@ -34,23 +33,23 @@ const App = () => {
         />
         <Route path="/register" element={<Register user={user} />} />
 
-        <Route
-          path=""
-          element={
-            <ErrorBoundary fallback={ErrorFallback}>
-              <PrivateRoute user={user}>
-                <Layout />
-              </PrivateRoute>
-            </ErrorBoundary>
-          }
-        >
-          <Route path="/listProduct" element={<ProductList />} />
-          <Route path="/addProduct" element={<AddProduct />} />
-          <Route path="/dashboard" element={<DashBoard />} />
-          <Route path="/userList" element={<UserList />} />
-          <Route path="/addUsers" element={<AddUsers/>} />
+          <Route
+            path=""
+            element={
+              <ErrorBoundary fallback={ErrorFallback}>
+                <PrivateRoute user={user}>
+                  <Layout />
+                </PrivateRoute>
+              </ErrorBoundary>
+            }
+          >
+            <Route path="/listProduct" element={<ProductList />} />
+            <Route path="/addProduct" element={<AddProduct />} />
+            <Route path="/dashboard" element={<DashBoard />} />
+            <Route path="/userList" element={<PrivateRoute user={user} userRoles={user.role}><UserList/></PrivateRoute>}/>
+            <Route path="/addUsers" element={<PrivateRoute user={user} userRoles={user.role}><AddUsers/></PrivateRoute>} />
 
-        </Route>
+          </Route>
       </Routes>
     </>
   );

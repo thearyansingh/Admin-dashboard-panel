@@ -136,8 +136,20 @@ const authMe = async (req, res) => {
   }
 };
 
+
 // const updateUser=async(req,res)=>{
 
 // }
 
-export { register, login, getAllUser, authMe };
+const logout = async (req, res) => {
+  try {
+   
+    res.clearCookie("token", { httpOnly: true, secure: false, sameSite: "lax" });
+    return res.status(200).json({ success: true, message: "Logged out" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ success: false, message: "Logout failed" });
+  }
+};
+
+export { register, login, getAllUser, authMe, logout };

@@ -1,19 +1,29 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api/user",
-  withCredentials: true
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true, // for cookies
+  timeout: 10000,
 });
 
-API.interceptors.request.use(
-
+axiosInstance.interceptors.request.use(
   (config) => {
-  console.log("Request sent with cookies");
-
+    // No need to attach token manually
     return config;
   },
-
   (error) => Promise.reject(error)
 );
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log("Session expired, redirecting to login...");
 
-export default API;
+      // redirect to login page
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);
+export default axiosInstance;

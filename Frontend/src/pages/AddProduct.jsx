@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { ProductContext } from "../context/ProductContext";
 import axios from "axios";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 const AddProduct = () => {
   const { Product } = useContext(ProductContext);
 
@@ -11,22 +11,33 @@ const AddProduct = () => {
     description: "",
     category: "",
     discount: "",
-  }); 
+  });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState({});
+  const newErrors = {};
 
-  const handleInput = (e) => {
+  const handleInput = (e)  => {
     setformData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      if (formData.name.length< 3)
+        newErrors.name = "name must be greater then 3 characters";
+      if (formData.description.split(" ").length < 20)
+        newErrors.description= "des must be greater then 20 words";
+
+      if (Object.keys(newErrors).length != 0) {
+        setError(newErrors)
+        return;
+      }
       const { data } = await axios.post(
         "http://localhost:5000/api/product/add",
         formData,
       );
       if (data.success === true) {
-        Product()
+        Product();
         setLoading(!loading);
         console.log(data);
         toast.success("form submit");
@@ -36,13 +47,13 @@ const AddProduct = () => {
       toast.error("form not submitted");
     }
   };
-  
+  console.log(error)
 
   return (
     <div className="bg-white rounded-lg shadow p-6 ">
       <h2 className="text-2xl font-bold mb-6 text-slate-400">Add product</h2>
 
-      <form className="space-y-2" onSubmit={handleSubmit}>
+      <form className="space-y-2"  onSubmit={handleSubmit}>
         <div>
           <label className="block mb-1 font-medium text-gray-600">
             Product Name
@@ -55,6 +66,7 @@ const AddProduct = () => {
             value={formData.name}
             className="w-full border text-black p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {error.name && <p className="text-red-500">{error.name}</p>}
         </div>
 
         <div>
@@ -113,6 +125,8 @@ const AddProduct = () => {
             placeholder="Enter product description"
             className="w-full border p-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
           ></textarea>
+          {error?.description && <p className="text-red-500">{error?.description}</p>}
+
         </div>
 
         {/* <div>

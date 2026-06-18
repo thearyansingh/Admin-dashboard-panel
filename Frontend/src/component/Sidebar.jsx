@@ -1,38 +1,57 @@
 import React, { useState } from "react";
 import { GiOpenBook } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../customHook/useAuth";
 const menuData = [
-
   {
     title: "Inventory",
-   submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
+    submenu: [
+      { name: "Product List", url: "/ListProduct" },
+      { name: "Add Product", url: "/addProduct" },
+      { name: "Product List", url: "/ListProduct" },
+    ],
   },
   {
     title: "Purchase",
-     submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
+    submenu: [
+      { name: "Product List", url: "/ListProduct" },
+      { name: "Add Product", url: "/addProduct" },
+      { name: "Product List", url: "/ListProduct" },
+    ],
   },
-   {
+  {
     title: "Sales",
-     submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
-  }, {
+    submenu: [
+      { name: "Product List", url: "/ListProduct" },
+      { name: "Add Product", url: "/addProduct" },
+      { name: "Product List", url: "/ListProduct" },
+    ],
+  },
+  {
     title: "Users",
-     submenu: [{name:"Users",url:"/userList"}],
-  }, {
+    submenu: [{ name: "Users", url: "/userList" }],
+  },
+  {
     title: "Reports",
-     submenu: [{name:"Product List",url:"/ListProduct"},{name:"Add Product",url:"/addProduct"},{name:"Product List",url:"/ListProduct"}],
+    submenu: [
+      { name: "Product List", url: "/ListProduct" },
+      { name: "Add Product", url: "/addProduct" },
+      { name: "Product List", url: "/ListProduct" },
+    ],
   },
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [activeOption, setActiveOption] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
-  console.log(openMenu)
+  const { user } = useAuth();
+  console.log(openMenu);
 
   const handleToggle = (title) => {
     if (openMenu === title) setOpenMenu(null);
     else setOpenMenu(title);
   };
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   return (
     <>
@@ -52,34 +71,37 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       >
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-bold">Admin Panel</h1>
-
         </div>
 
         <nav className="space-y-6">
-           <button
-                onClick={() =>navigate("/dashboard")}
-                className="w-full flex justify-between items-center px-3 py-2 rounded-lg hover:bg-gray-700"
-              >
-                <span>Dashboard</span>
-             
-              </button>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="w-full flex justify-between items-center px-3 py-2 rounded-lg hover:bg-gray-700"
+          >
+            <span>Dashboard</span>
+          </button>
 
           {menuData.map((menu) => (
             <div key={menu.title}>
-              <button
-                onClick={() => handleToggle(menu.title)}
-                className="w-full flex justify-between items-center px-3 py-2 rounded-lg hover:bg-gray-700"
-              >
-                <span>{menu.title}</span>
-                <span>{openMenu === menu.title ? "▲" : "▼"}</span>
-              </button>
+              {menu.title === "Users" &&
+              user.role !== "admin" ? null: (
+                  <button
+                    onClick={() => handleToggle(menu.title)}
+                    className="w-full flex justify-between items-center px-3 py-2 rounded-lg hover:bg-gray-700"
+                  >
+                    <>
+                      <span>{menu.title}</span>
+                      <span>{openMenu === menu.title ? "▲" : "▼"}</span>
+                    </>
+                  </button>
+                )}
 
               {openMenu === menu.title && (
                 <ul className="pl-3 space-y-3">
                   {menu.submenu.map((sub) => (
                     <li
                       key={sub.name}
-                      onClick={()=>navigate(sub.url)}
+                      onClick={() => navigate(sub.url)}
                       className="text-gray-300   hover:text-white  p-2 rounded-xl hover:bg-slate-400 cursor-pointer"
                     >
                       {sub.name}

@@ -8,11 +8,13 @@ import { ToastContainer } from 'react-toastify'
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from './ErrorFallback.jsx'
 import {Provider} from "react-redux"
-import { store } from './App/Store.js'
+import { persistor, store } from './App/Store.js'
+import { PersistGate } from 'redux-persist/integration/react'
 
 createRoot(document.getElementById('root')).render(
 
  <Provider store={store}>
+  <PersistGate  persistor={persistor}>
   <BrowserRouter>
   <ProductProvider>
     <ErrorBoundary FallbackComponent={ErrorFallback} >
@@ -21,6 +23,8 @@ createRoot(document.getElementById('root')).render(
     </ErrorBoundary>
   </ProductProvider>
   </BrowserRouter>
+  </PersistGate>
+
   </Provider>
   ,
 )
