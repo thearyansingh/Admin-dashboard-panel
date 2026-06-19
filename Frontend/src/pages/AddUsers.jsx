@@ -22,8 +22,9 @@ const AddUsers = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      const apiUrl = import.meta.env.VITE_API_BASE_URL;
       const { data } = await axios.post(
-        "http://localhost:5000/api/user/addUser",
+        `${apiUrl}/api/user/addUser`,
         formData,{withCredentials:true}
       );
    

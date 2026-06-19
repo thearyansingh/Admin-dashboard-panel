@@ -7,7 +7,7 @@ const UserList = () => {
   const navigate=useNavigate()
   const fetchUsers = async () => {
     try {
-      const { data } = await API.get("/getAllUser");
+      const { data } = await API.get("/api/user/getAllUser");
       setUsers(data.users);
     } catch (error) {
       console.log(error.message);

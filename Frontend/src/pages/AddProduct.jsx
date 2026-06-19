@@ -32,8 +32,9 @@ const AddProduct = () => {
         setError(newErrors)
         return;
       }
+      const apiUrl = import.meta.env.VITE_API_BASE_URL;
       const { data } = await axios.post(
-        "http://localhost:5000/api/product/add",
+        `${apiUrl}/api/product/add`,
         formData,
       );
       if (data.success === true) {
