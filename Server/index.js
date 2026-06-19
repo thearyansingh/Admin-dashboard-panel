@@ -12,7 +12,7 @@ connect();
 app.use(express.json());
 app.use(cokkieParser());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN || "http://13.207.102.250",
     credentials: true
 }));    
 app.get("/", (req, res) => res.json({message: "Hi"}));
